@@ -1,0 +1,8 @@
+---
+
+- name: Install nomad
+  hosts: all
+  become: yes
+  become_user: root
+  roles:
+    - { role: nomad, tags: nomad }

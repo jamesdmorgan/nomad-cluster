@@ -1,0 +1,4 @@
+---
+# Worker nodes
+
+nomad_mode: client

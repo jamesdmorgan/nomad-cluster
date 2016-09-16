@@ -1,0 +1,14 @@
+---
+nomad_datacenter: dc1
+nomad_debug: true
+nomad_servers_group: nomad_servers
+nomad_servers_list: "{{ groups[nomad_servers_group] }}"
+
+nomad_ports:
+  - { name: http, port: 4646 }
+  - { name: rpc, port:  4647 }
+
+
+nomad_interface: enp0s8
+nomad_advertise_ip: "{{ hostvars[inventory_hostname]['ansible_'+nomad_interface]['ipv4']['address'] }}"
+nomad_cluster_size: "{{ nomad_servers_list | length }}"

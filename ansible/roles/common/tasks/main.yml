@@ -1,0 +1,15 @@
+---
+- name: Install epel
+  yum: name=epel-release state=latest
+
+- name: Install required packages
+  yum: name={{ item }} state=latest
+  with_items: "{{ common_yum_packages }}"
+  tags:
+    - packages
+
+- name: install docker python dependencies
+  pip: name={{ item }}
+  with_items: "{{ common_pip_packages }}"
+  tags:
+    - packages

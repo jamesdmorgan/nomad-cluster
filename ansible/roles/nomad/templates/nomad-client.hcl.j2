@@ -1,0 +1,18 @@
+bind_addr = "{{ nomad_bind_ip | default(nomad_advertise_ip) }}"
+data_dir = "/var/data/nomad"
+datacenter = "{{ nomad_datacenter }}"
+enable_debug = "{{ nomad_debug | default(false)}}"
+
+advertise {
+    {% for item in nomad_ports %}
+    {{ item.name }} = "{{ nomad_advertise_ip }}:{{ item.port }}"
+    {% endfor %}
+}
+
+client {
+    enabled = true
+}
+
+consul {
+    address = "{{ consul_advertise }}:8500"
+}

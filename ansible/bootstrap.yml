@@ -1,0 +1,7 @@
+---
+# Consul web UI: http://192.168.77.21:8500/ui
+# DNS: dig @172.17.0.1 -p 53 manager2.node.consul
+#
+
+- include: swarm.yml
+- include: consul.yml

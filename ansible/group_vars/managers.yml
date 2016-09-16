@@ -1,0 +1,4 @@
+---
+# Manager nodes
+
+nomad_mode: server

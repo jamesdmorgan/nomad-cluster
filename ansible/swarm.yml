@@ -1,0 +1,112 @@
+---
+
+- hosts: all
+  become: yes
+  become_user: root
+  roles:
+    - { role: common, tags: common }
+    - { role: docker, tags: docker }
+  tasks:
+    - debug: var=docker_info.Swarm.LocalNodeState
+
+- name: Configure primary swarm manager
+  hosts: managers[0]
+  become: yes
+  become_user: root
+  tasks:
+    - name: "Starting primary swarm manager"
+      shell: >
+        docker swarm init --advertise-addr {{ vagrant_primary_manager_ip }}
+      register: init_result
+      when: docker_info.Swarm.LocalNodeState != "active"
+
+    - debug: var=init_result
+
+    - name: "Retrieve manager token"
+      shell: >
+        docker swarm join-token manager --quiet
+      register: manager_token_result
+
+    - set_fact:
+        manager_token: "{{ manager_token_result.stdout }}"
+
+    - name: "Retrieve worker token"
+      shell: >
+        docker swarm join-token worker --quiet
+      register: worker_token_result
+
+    - set_fact:
+        worker_token: "{{ worker_token_result.stdout }}"
+
+- hosts: managers[1:]
+  become: yes
+  become_user: root
+  tasks:
+    - name: "Starting secondary swarm managers"
+      shell: >
+        docker swarm join \
+          --token {{ hostvars['manager1']['manager_token'] }} \
+          {{ vagrant_primary_manager_ip }}:{{ swarm_bind_port }}
+      register: init_result
+      when: docker_info.Swarm.LocalNodeState != "active"
+
+- hosts: workers
+  become: yes
+  become_user: root
+  tasks:
+    - name: "Starting swarm workers"
+      shell: >
+        docker swarm join \
+          --token {{ hostvars['manager1']['worker_token'] }} \
+          {{ vagrant_primary_manager_ip }}:{{ swarm_bind_port }}
+      register: init_result
+      when: docker_info.Swarm.LocalNodeState != "active"
+
+- hosts: all
+  serial: 1
+  become: yes
+  become_user: root
+  tasks:
+    - name: "Label nodes"
+      shell: >
+        docker node update --label-add {{ item }}=true {{ inventory_hostname }}
+      when: "item != 'all_groups'"
+      with_items:
+        - "{{ group_names }}"
+      delegate_to: "{{ groups['managers'][0] }}"
+      tags:
+        - label
+
+- include: network.yml
+
+- hosts: managers[0]
+  become: yes
+  become_user: root
+  tasks:
+
+    - name: Examine the swarm
+      no_log: true
+      shell: >
+        echo -e "GET /info HTTP/1.0\r\n" | nc -U /var/run/docker.sock | tail -n +6 | python -m json.tool
+      register: docker_swarm_result
+
+    - set_fact:
+        docker_swarm_info: "{{ docker_swarm_result.stdout | from_json }}"
+
+    - debug: var=docker_swarm_info.Swarm
+
+    #- name: Start docker-ui globally (needs work)
+    #  run_once: true
+    #  shell: >
+    #    docker service create \
+    #      --name docker-ui \
+    #      --mount type=bind,target=/var/run/docker.sock,src=/var/run/docker.sock \
+    #      -p 9000:9000/tcp \
+    #      --network appnet \
+    #      --mode global \
+    #      uifd/ui-for-docker \
+    #  tags:
+    #ß    - docker-ui
+
+
+

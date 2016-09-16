@@ -1,0 +1,18 @@
+---
+
+common_yum_packages:
+  - nc
+  - nmap
+  - htop
+  - sysstat
+  - python-pip
+  - bind-utils
+  - jq # Json formatting
+  - net-tools
+  - unzip
+
+
+common_pip_packages:
+  - pyyaml
+  - docker-py
+  - docker-compose

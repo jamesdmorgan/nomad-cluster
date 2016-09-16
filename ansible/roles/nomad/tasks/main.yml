@@ -1,0 +1,114 @@
+---
+# vim:ft=ansible:
+
+- debug: var=nomad_servers_list
+
+- name: Download
+  get_url:
+      url: https://releases.hashicorp.com/nomad/0.4.1/nomad_0.4.1_linux_amd64.zip
+      checksum: sha256:0cdb5dd95c918c6237dddeafe2e9d2049558fea79ed43eacdfcd247d5b093d67
+      dest: /tmp/nomad_0.4.1.zip
+
+- name:  Unzip
+  become: yes
+  unarchive:
+      src: /tmp/nomad_0.4.1.zip
+      dest: /usr/local/sbin/
+      copy: no
+      mode: 0555
+
+- name:  Create nomad group
+  become: yes
+  group:
+      name: nomad
+      system: yes
+
+- name: Create nomad user
+  become: yes
+  user:
+      name: nomad
+      comment: System user for nomad agent
+      createhome: no
+      group: nomad
+      groups: docker
+      system: yes
+
+- name: Copy systemd unit
+  become: yes
+  template:
+    src: nomad.service.j2
+    dest: /etc/systemd/system/nomad.service
+    owner: nomad
+    group: nomad
+    mode: 0555
+
+- name: Create configuration dir
+  become: yes
+  file:
+    state: directory
+    mode: 0555
+    owner: nomad
+    group: nomad
+    path: /etc/nomad.d
+
+- name: Create /var/data
+  become: yes
+  file:
+    state: directory
+    owner: root
+    path: /var/data
+    mode: 0755
+
+- name: Create data dir
+  become: yes
+  file:
+    state: directory
+    owner: nomad
+    group: nomad
+    path: /var/data/nomad
+    mode: 0775
+
+- name: Create client config
+  template:
+    src: "nomad-{{ item }}.hcl.j2"
+    dest: "/etc/nomad.d/nomad-{{ item }}.hcl"
+    mode: 0600
+    owner: nomad
+    group: nomad
+  become: yes
+  when: nomad_mode | default('client') == item
+  with_items:
+    - server
+    - client
+
+- name: Start service
+  service:
+    name: nomad
+    enabled: yes
+    state: restarted
+
+- name: Stop existing Nomad UI
+  run_once: true
+  shell: >
+    docker service rm nomad-ui
+  ignore_errors: true
+  tags:
+    - service
+
+- name: Start Nomad UI on the Swarm (should use nomad cluster)
+  run_once: true
+  shell: >
+    docker service create \
+      --name nomad-ui \
+      --mode global \
+      --network appnet \
+      --env "NOMAD_ADDR={{ nomad_bind_ip | default(nomad_advertise_ip) }}" \
+      --log-driver syslog \
+      --log-opt tag={{ docker_syslog_tag }} \
+      -p 8000:3000 \
+      iverberk/nomad-ui:0.1.0
+  delegate_to: "{{ item }}"
+  with_items:
+    - "{{ groups['managers'][0] }}"
+  tags:
+    - service

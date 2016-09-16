@@ -66,10 +66,11 @@ Sep 16 15:30:16 manager3 nomad[17512]: 2016/09/16 15:30:16 [INFO] raft: Node at 
 
 Quorum is established and each Nomad node should be listed in Consul UI.
 
+```http://192.168.77.21:8500/ui```
 <img src="https://raw.githubusercontent.com/jamesdmorgan/nomad-cluster/master/images/consul-nomad.png" width="100%">
 
 <img src="https://raw.githubusercontent.com/jamesdmorgan/nomad-cluster/master/images/consul-redis-instance.png" width="100%">
 ## Nomad UI
 
-
+```http://192.168.77.22:8000/#```
 <img src="https://raw.githubusercontent.com/jamesdmorgan/nomad-cluster/master/images/nomad-ui-redis.png" width="100%">

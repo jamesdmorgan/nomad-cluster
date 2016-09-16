@@ -68,6 +68,8 @@ Quorum is established and each Nomad node should be listed in Consul UI.
 
 <img src="https://raw.githubusercontent.com/jamesdmorgan/nomad-cluster/master/images/consul-nomad.png" width="100%">
 
+<img src="https://raw.githubusercontent.com/jamesdmorgan/nomad-cluster/master/images/consul-redis-instance.png" width="100%">
 ## Nomad UI
 
 
+<img src="https://raw.githubusercontent.com/jamesdmorgan/nomad-cluster/master/images/nomad-ui-redis.png" width="100%">

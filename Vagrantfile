@@ -14,13 +14,13 @@
 # Requires vagrant-host-shell
 
 VAGRANTFILE_API_VERSION = "2"
-MANAGERS = 3
-WORKERS = 3
+MANAGERS = 1
+WORKERS = 2
 ANSIBLE_GROUPS = {
   "managers" => ["manager[1:#{MANAGERS}]"],
   "workers" => ["worker[1:#{WORKERS}]"],
-  "elk" => ["manager[2:2]"],
-  "influxdb" => ["manager[3:3]"],
+  "elk" => ["manager[${MANAGERS}:${MANAGERS}]"],
+  "influxdb" => ["manager[${WORKERS}:${WORKERS}]"],
   "all_groups:children" => [
     "managers",
     "workers",
@@ -63,9 +63,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       if worker_id == WORKERS
 
         # Install any ansible galaxy roles
-        worker.vm.provision "shell", type: "host_shell" do |sh|
-          sh.inline =  "cd ansible && ansible-galaxy install -r requirements.yml -p roles"
-        end
+        #worker.vm.provision "shell", type: "host_shell" do |sh|
+        #  sh.inline =  "cd ansible && ansible-galaxy install -r requirements.yml -p roles"
+        #end
 
         worker.vm.provision "bootstrap", type: "ansible" do |ansible|
             ansible.limit = "all"

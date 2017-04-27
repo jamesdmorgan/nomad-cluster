@@ -1,18 +1,26 @@
-- name: Install python-consul
-  pip:  name=python-consul  state=present
+- pip: name=docker state=absent
+- pip: name=docker-py state=absent
+- pip: name=docker state=present
+- name: Install pip packages
+  pip:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python-consul
+    - docker-py
 
 - debug: var=consul_advertise
 - debug: var=consul_join_ip
 - debug: var=consul_servers_list
 
 - name: run consul container with bootstrap
-  docker:
+  docker_container:
     name: consul
     image: "{{ consul_image }}"
-    state: reloaded
+    state: started
     detach: true
     restart_policy: always
-    net: bridge
+    network_mode: bridge
     ports: "{{ consul_ports }}"
     hostname: "{{ ansible_hostname }}"
     volumes:
@@ -24,10 +32,10 @@
   docker:
     name: consul
     image: "{{ consul_image }}"
-    state: reloaded
+    state: started
     detach: true
     restart_policy: always
-    net: bridge
+    network_mode: bridge
     ports: "{{ consul_ports }}"
     volumes:
     - /mnt:/data
@@ -36,13 +44,13 @@
   when: consul_mode == "server" and consul_bootstrap == "0"
 
 - name: run consul client container with join ip
-  docker:
+  docker_container:
     name: consul
     image: "{{ consul_image }}"
-    state: reloaded
+    state: started
     detach: true
     restart_policy: always
-    net: bridge
+    network_mode: bridge
     ports: "{{ consul_ports }}"
     volumes:
     - /mnt:/data

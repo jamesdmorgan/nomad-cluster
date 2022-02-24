@@ -11,8 +11,8 @@ common_yum_packages:
   - net-tools
   - unzip
 
-
 common_pip_packages:
+  - pathlib
   - pyyaml
-  - docker-py
+  - docker
   - docker-compose

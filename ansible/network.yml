@@ -6,10 +6,13 @@
   tasks:
     - name: Get networks
       shell: >
-        docker network ls --filter name={{ item }}$ | tail -n +2
+        docker network ls --filter name={{ item }} | awk '{print $2}' | tail -n +2
       with_items:
         - appnet
       register: network_result
+    
+    - debug:
+        msg: "{{network_result}}"
 
     - set_fact:
         docker_current_networks: "{{ network_result.results | map(attribute='stdout') | list | join(' ') }}"

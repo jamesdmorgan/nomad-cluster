@@ -1,6 +1,6 @@
 ---
 
-vagrant_network_interface: enp0s8
+vagrant_network_interface: eth1
 vagrant_primary_manager_ip: "{{ hostvars['manager1']['ansible_'+vagrant_network_interface].ipv4.address }}"
 
 docker_syslog_tag: "{% raw %}'{{.ImageName}}/{{.Name}}/{{.ID}}'{% endraw %}"
@@ -12,7 +12,7 @@ swarm_bind_port: 2377
 logstash_host: "{{ hostvars['manager2']['ansible_'+vagrant_network_interface].ipv4.address }}"
 
 # Consul
-consul_interface: enp0s8
+consul_interface: eth1
 consul_advertise: "{{ hostvars[inventory_hostname]['ansible_'+consul_interface]['ipv4']['address'] }}"
 
 # Nomad

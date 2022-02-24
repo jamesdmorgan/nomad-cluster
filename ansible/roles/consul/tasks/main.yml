@@ -1,16 +1,13 @@
-- pip: name=docker state=absent
-- pip: name=docker-py state=absent
-- pip: name=docker state=present
+
 - name: Install pip packages
   pip:
-    name: "{{ item }}"
+    name:  python-consul
     state: present
-  with_items:
-    - python-consul
-    - docker-py
 
 - debug: var=consul_advertise
+
 - debug: var=consul_join_ip
+
 - debug: var=consul_servers_list
 
 - name: run consul container with bootstrap

@@ -9,6 +9,6 @@ nomad_ports:
   - { name: rpc, port:  4647 }
 
 
-nomad_interface: enp0s8
+nomad_interface: eth1
 nomad_advertise_ip: "{{ hostvars[inventory_hostname]['ansible_'+nomad_interface]['ipv4']['address'] }}"
 nomad_cluster_size: "{{ nomad_servers_list | length }}"

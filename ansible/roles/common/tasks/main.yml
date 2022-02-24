@@ -1,15 +1,30 @@
 ---
 - name: Install epel
-  yum: name=epel-release state=latest
+  yum: 
+    name: epel-release 
+    state: latest
 
 - name: Install required packages
-  yum: name={{ item }} state=latest
-  with_items: "{{ common_yum_packages }}"
+  yum: 
+    name: "{{ common_yum_packages }}"
+    state: latest 
   tags:
     - packages
 
+- name: Get bootstrap script for pip
+  become: true 
+  get_url:
+    url: https://bootstrap.pypa.io/pip/2.7/get-pip.py
+    dest: /root/get-pip.py
+
+- name: Update pip
+  become: true
+  shell:
+    cmd: python /root/get-pip.py
+    
 - name: install docker python dependencies
-  pip: name={{ item }}
-  with_items: "{{ common_pip_packages }}"
+  pip: 
+    name: "{{ common_pip_packages }}"
   tags:
     - packages
+

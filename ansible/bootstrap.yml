@@ -3,5 +3,5 @@
 # DNS: dig @172.17.0.1 -p 53 manager2.node.consul
 #
 
-- include: swarm.yml
-- include: consul.yml
+- import_playbook: swarm.yml
+- import_playbook: consul.yml

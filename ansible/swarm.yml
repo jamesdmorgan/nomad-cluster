@@ -77,7 +77,7 @@
       tags:
         - label
 
-- include: network.yml
+- import_playbook: network.yml
 
 - hosts: managers[0]
   become: yes
